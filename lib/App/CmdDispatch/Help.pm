@@ -3,7 +3,7 @@ package App::CmdDispatch::Help;
 use warnings;
 use strict;
 
-our $VERSION = '0.1';
+our $VERSION = '0.2';
 
 sub new
 {
@@ -38,14 +38,14 @@ sub _extend_table_with_help
 {
     my ( $commands ) = @_;
     $commands->{help} = {
-        code     => \&_dispatch_help,
-        synopsis => "help [command|alias]",
-        help     => "Display help about commands and/or aliases. Limit display with the\nargument.",
+        code => \&_dispatch_help,
+        clue => "help [command|alias]",
+        help => "Display help about commands and/or aliases. Limit display with the\nargument.",
     };
     $commands->{hint} = {
-        code     => \&_dispatch_hint,
-        synopsis => "hint [command|alias]",
-        help     => 'A list of commands and/or aliases. Limit display with the argument.',
+        code => \&_dispatch_hint,
+        clue => "hint [command|alias]",
+        help => 'A list of commands and/or aliases. Limit display with the argument.',
     };
     return;
 }
@@ -64,9 +64,19 @@ sub _dispatch_hint
 
 sub _hint_string
 {
+    my ( $self, $cmd, $maxlen ) = @_;
+    my $desc = $self->_table->get_command( $cmd );
+    return '' unless $desc;
+    my $indent = ( $maxlen ? ' ' x (3 + $maxlen-length $desc->{clue}) : '   ' );
+    return $desc->{clue} . ($desc->{abstract} ? $indent . $desc->{abstract} : '');
+}
+
+sub _clue_string
+{
     my ( $self, $cmd ) = @_;
     my $desc = $self->_table->get_command( $cmd );
-    return $desc ? $desc->{synopsis} : $desc;
+    return '' unless $desc;
+    return $desc->{clue};
 }
 
 sub _help_string
@@ -84,6 +94,7 @@ sub _list_command
     $self->_print( "\nCommands:\n" );
     foreach my $c ( $self->{owner}->command_list() )
     {
+
         # The following should not be possible. But I'll keep this until
         # I'm absolutely certain.
         next if $c eq '' or !$self->_table->get_command( $c );
@@ -113,8 +124,15 @@ sub hint
 
     if( _is_missing( $arg ) )
     {
+        my $maxlen = 0;
+        my $len;
+        foreach my $cmd ( $self->_table->command_list() )
+        {
+            $len = length $self->_table->get_command( $cmd )->{clue};
+            $maxlen = $len if $len > $maxlen;
+        }
         $self->_print( "\n$self->{pre_hint}\n" ) if $self->{pre_hint};
-        $self->_list_command( sub { $self->{indent_hint}, $self->_hint_string( $_[0] ), "\n"; } );
+        $self->_list_command( sub { $self->{indent_hint}, $self->_hint_string( $_[0], $maxlen ), "\n"; } );
         $self->_list_aliases();
         $self->_print( "\n$self->{post_hint}\n" ) if $self->{post_hint};
         return;
@@ -153,7 +171,7 @@ sub help
         $self->_print( "\n$self->{pre_help}\n" ) if $self->{pre_help};
         $self->_list_command(
             sub {
-                $self->{indent_hint}, $self->_hint_string( $_[0] ), "\n",
+                $self->{indent_hint}, $self->_clue_string( $_[0] ), "\n",
                     $self->_help_string( $_[0] ), "\n";
             }
         );
@@ -164,7 +182,7 @@ sub help
 
     if( $self->_table->get_command( $arg ) )
     {
-        $self->_print( "\n", $self->_hint_string( $arg ),
+        $self->_print( "\n", $self->_clue_string( $arg ),
             "\n", ( $self->_help_string( $arg ) || $self->{indent_help} . "No help for '$arg'" ),
             "\n" );
     }
@@ -176,7 +194,7 @@ sub help
     {
         $self->_list_command(
             sub {
-                $self->{indent_hint}, $self->_hint_string( $_[0] ), "\n",
+                $self->{indent_hint}, $self->_clue_string( $_[0] ), "\n",
                     $self->_help_string( $_[0] ), "\n";
             }
         );
@@ -199,8 +217,8 @@ sub normalize_command_help
     foreach my $cmd ( $table->command_list )
     {
         my $desc = $table->get_command( $cmd );
-        $desc->{synopsis} = $cmd unless defined $desc->{synopsis};
-        $desc->{help}     = ''   unless defined $desc->{help};
+        $desc->{clue} = $cmd unless defined $desc->{clue};
+        $desc->{help} = ''   unless defined $desc->{help};
     }
     return;
 }
@@ -229,7 +247,7 @@ App::CmdDispatch::Help - Provide help functionality for the CmdDispatch module
 
 =head1 VERSION
 
-This document describes App::CmdDispatch::Help version 0.1
+This document describes App::CmdDispatch::Help version 0.2
 
 =head1 SYNOPSIS
 
@@ -262,7 +280,7 @@ from the description hash of each command.
 
 =over 4
 
-=item synopsis
+=item clue
 
 This text is a short blurb showing the format of the command.
 

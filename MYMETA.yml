@@ -23,4 +23,4 @@ requires:
   Term::ReadLine: 0
   Test::Exception: 0
   Test::More: 0
-version: 0.1
+version: 0.2
