@@ -4,12 +4,15 @@ use warnings;
 use strict;
 use Term::ReadLine;
 
-our $VERSION = '0.2';
+our $VERSION = '0.3';
 
+my $term;
 sub new
 {
     my $class = shift;
-    return bless {}, $class;
+    $term ||= Term::ReadLine->new('CmdDispatch Shell');
+    $term->ornaments( 0 );
+    return bless { term => $term }, $class;
 }
 
 sub print
@@ -21,14 +24,13 @@ sub print
 sub readline
 {
     my ($self) = @_;
-    return Term::ReadLine::readline();
+    return $self->{term}->readline( '' );
 }
 
 sub prompt
 {
     my ($self, @in) = @_;
-    $self->print( @in );
-    return $self->readline();
+    return $self->{term}->readline( @in );
 }
 
 1;
@@ -41,7 +43,7 @@ App::CmdDispatch::IO - Abstract out the input and output for C<App::CmdDispatch>
 
 =head1 VERSION
 
-This document describes C<App::CmdDispatch::IO> version 0.2
+This document describes C<App::CmdDispatch::IO> version 0.3
 
 =head1 SYNOPSIS
 

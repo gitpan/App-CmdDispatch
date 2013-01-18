@@ -8,7 +8,7 @@ use Term::ReadLine;
 use App::CmdDispatch::IO;
 use App::CmdDispatch::Table;
 
-our $VERSION = '0.2';
+our $VERSION = '0.3';
 
 sub new
 {
@@ -194,9 +194,10 @@ sub _setup_commands
         if( $def eq 'shell' )
         {
             $commands->{shell} = {
-                code => \&App::CmdDispatch::shell,
-                clue => 'shell',
-                help => 'Execute commands as entered until quit.',
+                code     => \&App::CmdDispatch::shell,
+                clue     => 'shell',
+                abstract => 'Launch an interactive command shell.',
+                help     => 'Execute commands as entered until quit.',
             };
         }
         elsif( $def eq 'help' )
@@ -224,7 +225,7 @@ App::CmdDispatch - Handle command line processing for programs with subcommands
 
 =head1 VERSION
 
-This document describes C<App::CmdDispatch> version 0.2
+This document describes C<App::CmdDispatch> version 0.3
 
 =head1 SYNOPSIS
 

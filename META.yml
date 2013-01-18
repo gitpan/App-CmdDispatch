@@ -1,10 +1,10 @@
 --- #YAML:1.0
 name:               App-CmdDispatch
-version:            0.2
+version:            0.3
 abstract:           Handle command line processing for programs with subcommands
 author:
     - G. Wade Johnson <wade@cpan.org>
-license:            unknown
+license:            perl
 distribution_type:  module
 configure_requires:
     ExtUtils::MakeMaker:  0
@@ -15,6 +15,8 @@ requires:
     Term::ReadLine:   0
     Test::Exception:  0
     Test::More:       0
+resources:
+    repository:  https://github.com/gwadej/app-cmddispatch
 no_index:
     directory:
         - t
